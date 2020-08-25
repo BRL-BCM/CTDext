@@ -7,6 +7,8 @@ Maintainer: Lillian Thistlethwaite <lillian.thistlethwaite@bcm.edu>
 Description: Added functionalities, including pathway visualization software, pre-computed networks, pre-computed node rankings, and an R shiny application.
 Depends: R (>= 3.3.0),
 	 CTD,
+	 igraph,
+	 stats,
 	 plotly,
 	 gplots,
 	 RColorBrewer,

@@ -9,7 +9,7 @@
 #' @export plot.pathwayMap_CaseCntl
 #' @usage plot.pathwayMap_CaseCntl(Pathway, groupName, pvalues, out.path, SVG=TRUE)
 #' @examples
-#' pwys = pathway.ListMaps_metabolon()
+#' require(CTD)
 #' data(Miller2015)
 #' Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
 #' type = diagnoses$diagnosis
@@ -17,6 +17,7 @@
 #' Miller2015 = Miller2015[-which(sdd==0),]
 #' pvals = unlist(apply(Miller2015, 1, function(i) t.test(i[which(type=="Argininemia")], i[which(type=="No biochemical genetic diagnosis")])$p.value))
 #' names(pvals) = rownames(Miller2015)
+#' pwys = pathway.ListMaps_metabolon()
 #' plot.pathwayMap_CaseCntl("allPathways", groupName="Argininemia", pvalues=pvals, out.path=getwd(), SVG=TRUE)
 plot.pathwayMap_CaseCntl = function(Pathway, groupName, pvalues, out.path, SVG=TRUE) {
   if (Pathway != "All Pathways") Pathway= paste0(unlist(strsplit(Pathway," ")),collapse = "-")  else Pathway ="allPathways"
@@ -27,15 +28,15 @@ plot.pathwayMap_CaseCntl = function(Pathway, groupName, pvalues, out.path, SVG=T
   names(pvalues) = tolower(trimws(names(pvalues)))
   names(pvalues) = gsub("\\\"", "", names(pvalues))
   names(pvalues) = gsub("\\*", "", names(pvalues))
-  load(system.file("extdata/complexNodes.RData", package = "CTD"))
-  load(system.file(sprintf("extdata/RData/%s.RData", Pathway), package = "CTD"))
+  load(system.file("extdata/complexNodes.RData", package = "CTDext"))
+  load(system.file(sprintf("extdata/RData/%s.RData", Pathway), package = "CTDext"))
   template.g = ig
 
   if (length(which(names(pvalues)=="3-ureidopropionate"))>0) {
     names(pvalues)[which(names(pvalues)=="3-ureidopropionate")] = "ureidopropionate"
   }
   
-  nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway, Pathway), package = "CTD"), header=TRUE, sep="\n", check.names = FALSE)
+  nodeDisplayNames= read.table(system.file(sprintf("extdata/%s/Name-%s.txt", Pathway, Pathway), package = "CTDext"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeDisplayNames, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = suppressWarnings(as.numeric(tmp.nms))
@@ -46,7 +47,7 @@ plot.pathwayMap_CaseCntl = function(Pathway, groupName, pvalues, out.path, SVG=T
   names(nodeDisplayNames) = tmp.nms
   nodeDisplayNames = gsub("\\+", " ", nodeDisplayNames)
   # Load id to node types mappings
-  nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway, Pathway), package = "CTD"), header=TRUE, sep="\n", check.names = FALSE)
+  nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway, Pathway), package = "CTDext"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = suppressWarnings(as.numeric(tmp.nms))
@@ -65,7 +66,7 @@ plot.pathwayMap_CaseCntl = function(Pathway, groupName, pvalues, out.path, SVG=T
   }
   node.labels = as.character(sapply(node.labels, URLdecode))
 
-  metabolon_to_data = read.csv(system.file("extdata/metabolon_to_data.txt", package = "CTD"), sep="\t", header=TRUE, as.is=TRUE, stringsAsFactors = FALSE)
+  metabolon_to_data = read.csv(system.file("extdata/metabolon_to_data.txt", package = "CTDext"), sep="\t", header=TRUE, as.is=TRUE, stringsAsFactors = FALSE)
   metabolon_to_data = metabolon_to_data[,c(1,2,3,4)]
   metabolon_to_data = apply(metabolon_to_data, 2, tolower)
   # Relabel nodes that have different names in dataset

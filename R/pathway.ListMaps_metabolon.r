@@ -9,7 +9,7 @@
 #' pwys = pathway.ListMaps_metabolon()
 #' print(pwys)
 pathway.ListMaps_metabolon = function() {
-  ig_files = list.files(system.file("extdata/RData/", package="CTD"), pattern = ".RData")
+  ig_files = list.files(system.file("extdata/RData/", package="CTDext"), pattern = ".RData")
   ig_files = ig_files
   pwys = unlist(sapply(ig_files, function(i) unlist(strsplit(i, split=".RData"))[1]))
   pwys = as.character(pwys)

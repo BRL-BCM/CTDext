@@ -6,25 +6,27 @@
 #' @param pathway.knowledgebase - The filename of the .gmt file associated with the pathway knowledge desired.
 #'                               Currently only "Metabolon" is offered, though "KEGG", "WikiPathways", "SMPDB"
 #'                               and/or "Reactome" can be added in future versions.
-#' @export stats.getMSEA_Metabolon
+#' @export stat.getMSEA_Metabolon
 #' @examples
 #' data(Miller2015)
 #' # Get class labels for diagnostic class "diagClass"
-#' diagClass = [insert diagnosis here]
-#' class.labels = diagnoses$id
-#' class.labels[which(!(class.labels %in% cohorts[[diagClass]]))] = 0
+#' diagClass = "Citrullinemia"
+#' cohorts = list()
+#' cohorts[[diagClass]] = colnames(Miller2015[,which(Miller2015[1,]==diagClass)])
+#' cohorts[["ref"]] = colnames(Miller2015[,which(Miller2015[1,]=="No biochemical genetic diagnosis")])
+#' class.labels = unlist(cohorts)
+#' class.labels[-which(class.labels %in% cohorts[[diagClass]])] = 0
 #' class.labels[which(class.labels %in% cohorts[[diagClass]])] = 1
 #' class.labels = as.numeric(class.labels)
 #'
 #' # Create the data matrix 
-#' data_mx = Miller2015[,grep("IEM", colnames(Miller2015))]
-#' data_mx = data_mx[, order(class.labels)]
+#' data_mx = Miller2015[-1,which(colnames(Miller2015) %in% unlist(cohorts)))]
 #'
 #' # Generate a .gmt file.
-#' population = names(met.profile)
+#' population = rownames(data_mx)
 #' paths.hsa = list.dirs(path="../inst/extdata", full.names = FALSE)
 #' paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways"))]
-#' sink(system.file("extdata/Pathway_GMTs/Metabolon.gmt", package="CTD"))
+#' sink(system.file("extdata/Pathway_GMTs/Metabolon.gmt", package="CTDext"))
 #' for (p in 1:length(paths.hsa)) {
 #'   load(sprintf("../inst/extdata/RData/%s.RData", paths.hsa[p]))
 #'   pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
@@ -34,15 +36,15 @@
 #' sink()
 #' print("test")
 #' pathway.data = stats.getMSEA_Metabolon(data_mx, class.labels, pathway_knowledgebase = "Metabolon")
-stats.getMSEA_Metabolon = function(data, class.labels, pathway_knowledgebase = "Metabolon") {
+stat.getMSEA_Metabolon = function(data, class.labels, pathway_knowledgebase = "Metabolon") {
   data = data[, order(class.labels)]
   class.labels = class.labels[order(class.labels)]
   phen1 = 0
   phen2 = 1
-  # Third, provide the file extension local to the installation of the CTD package for the 
+  # Third, provide the file extension local to the installation of the CTDext package for the 
   # desired pathway knowledgebase .GMT.
   if (pathway_knowledgebase=="Metabolon") {
-    met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTD")
+    met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTDext")
   } else {
     print(sprintf("The .GMT for pathway knowledgebase %s not available at this time.", pathway_knowledgebase))
   }

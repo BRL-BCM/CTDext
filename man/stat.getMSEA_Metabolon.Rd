@@ -35,14 +35,14 @@ data_mx = Miller2015[-1,which(colnames(Miller2015) \%in\% unlist(cohorts)))]
 
 # Generate a .gmt file.
 population = rownames(data_mx)
-paths.hsa = list.dirs(path="../inst/extdata", full.names = FALSE)
-paths.hsa = paths.hsa[-which(paths.hsa \%in\% c("", "RData", "allPathways"))]
+paths.hsa = list.dirs(path=system.file("extdata", package="CTDext"), full.names = FALSE)
+paths.hsa = paths.hsa[-which(paths.hsa \%in\% c("", "RData", "allPathways", "Pathway_GMTs"))]
 sink(system.file("extdata/Pathway_GMTs/Metabolon.gmt", package="CTDext"))
 for (p in 1:length(paths.hsa)) {
-  load(sprintf("../inst/extdata/RData/\%s.RData", paths.hsa[p]))
+  load(system.file(sprintf("extdata/RData/\%s.RData", paths.hsa[p]), package="CTDext"))
   pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
   pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds \%in\% population)]))
-  print(sprintf("\%s         \%s", paths.hsa[p], paste(pathCompIDs, collapse="    ")), quote=FALSE)
+  cat(sprintf("\%s         \%s\n", paths.hsa[p], paste(pathCompIDs, collapse="    ")))
 }
 sink()
 print("test")

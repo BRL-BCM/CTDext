@@ -15,7 +15,7 @@ shiny.getMSEA_Metabolon(input, cohorts)
 
 \item{nperm:}{Number of random permutations (default: 1000)}
 
-\item{weighted.score.type:}{Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weigth, 2 = over-weigth (default: 1)}
+\item{weighted.score.type:}{Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weight, 2 = over-weight (default: 1)}
 
 \item{adjust.FDR.q.val:}{Adjust the FDR q-vals (default: F)}
 
@@ -23,7 +23,7 @@ shiny.getMSEA_Metabolon(input, cohorts)
 
 \item{met.size.threshold.max:}{Maximum size (in metabolites) for database metabolite sets to be considered (default: 500)}
 
-\item{random.seed:}{Random number metaboliterator seed. (default: 123456)}
+\item{random.seed:}{Random number seed. (default: 123456)}
 }
 \value{
 report: Global output report, sorted by NES in decreasing order.
@@ -38,4 +38,28 @@ determines whether members of an a priori defined metabolite set are nonrandomly
 list and thus may correspond to an important biological process. To assess significance the program uses an empirical
 permutation procedure to test deviation from random that preserves correlations between metabolites. For details see 
 Subramanian et al 2005.
+}
+\examples{
+# If the .GMT file isn't already created, create it.
+data(Miller2015)
+population = rownames(Miller2015)
+paths.hsa = list.dirs(path=system.file("extdata", package="CTDext"), full.names = FALSE)
+paths.hsa = paths.hsa[-which(paths.hsa \%in\% c("", "RData", "allPathways", "MSEA_Datasets"))]
+sink(sprintf("\%s/Metabolon.gmt", system.file("extdata/MSEA_Datasets", package="CTDext")))
+for (p in 1:length(paths.hsa)) {
+  load(system.file(sprintf("/extdata/RData/\%s.RData", paths.hsa[p]), package="CTDext"))
+  pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
+  pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds \%in\% population)]))
+  print(sprintf("\%s         \%s", paths.hsa[p], paste(pathCompIDs, collapse="    ")), quote=FALSE)
+}
+sink()
+res = shiny.getMSEA_Metabolon(input, cohorts)
+# The format (columns) for the global result files is as follows.
+#     Pathway : Pathway name.
+#     SIZE : Size of the set in metabolites.
+#     NES : Normalized (multiplicative rescaling) normalized enrichment score.
+#     NOM p-val : Nominal p-value (from the null distribution of the metabolite set).
+#     FDR q-val: False discovery rate q-values
+#     FWER p-val: Family wise error rate p-values.
+#     glob.p.val: P-value using a global statistic (number of sets above the set's NES).
 }

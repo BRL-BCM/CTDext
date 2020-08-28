@@ -21,7 +21,7 @@ plot.pathwayMap_CaseCntl(Pathway, groupName, pvalues, out.path, SVG=TRUE)
 Generate pathway map with patient perturbation data superimposed.
 }
 \examples{
-pwys = pathway.ListMaps_metabolon()
+require(CTD)
 data(Miller2015)
 Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
 type = diagnoses$diagnosis
@@ -29,5 +29,6 @@ sdd = apply(Miller2015[,which(type=="Argininemia")], 1, sd)
 Miller2015 = Miller2015[-which(sdd==0),]
 pvals = unlist(apply(Miller2015, 1, function(i) t.test(i[which(type=="Argininemia")], i[which(type=="No biochemical genetic diagnosis")])$p.value))
 names(pvals) = rownames(Miller2015)
+pwys = pathway.ListMaps_metabolon()
 plot.pathwayMap_CaseCntl("allPathways", groupName="Argininemia", pvalues=pvals, out.path=getwd(), SVG=TRUE)
 }

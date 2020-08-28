@@ -35,7 +35,7 @@
 #' }
 #' sink()
 #' print("test")
-#' pathway.data = stats.getMSEA_Metabolon(data_mx, class.labels, pathway_knowledgebase = "Metabolon")
+#' pathway.data = stat.getMSEA_Metabolon(data_mx, class.labels, pathway_knowledgebase = "Metabolon")
 stat.getMSEA_Metabolon = function(data, class.labels, pathway_knowledgebase = "Metabolon") {
   data = data[, order(class.labels)]
   class.labels = class.labels[order(class.labels)]

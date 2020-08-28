@@ -25,10 +25,11 @@ plot.pathwayMap(Pathway, ptID, pt.zscore, zscore.threshold, scale, out.path, SVG
 Generate pathway map with patient perturbation data superimposed.
 }
 \examples{
-Pathway = pathway.ListMaps_metabolon()
+require(CTD)
 data(Miller2015)
-Miller2015 = Miller2015[,grep("IEM", colnames(Miller2015))]
+Miller2015 = Miller2015[-1,grep("IEM", colnames(Miller2015))]
 ptID = colnames(Miller2015)[1]
 pt.zscore = Miller2015[,1]
+Pathway = pathway.ListMaps_metabolon()
 plot.pathwayMap(Pathway[1], ptID, pt.zscore, zscore.threshold, scale=1, out.path=getwd(), SVG=TRUE)
 }

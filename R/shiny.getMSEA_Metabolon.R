@@ -14,36 +14,36 @@
 #' @param cls:  Input class vector (phenotype)
 #' @param met.db: Metabolite set database in GMT format
 #' @param nperm: Number of random permutations (default: 1000)
-#' @param weighted.score.type: Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weigth, 2 = over-weigth (default: 1)
+#' @param weighted.score.type: Enrichment correlation-based weighting: 0=no weight (KS), 1=standard weight, 2 = over-weight (default: 1)
 #' @param adjust.FDR.q.val: Adjust the FDR q-vals (default: F)
 #' @param met.size.threshold.min: Minimum size (in metabolites) for database metabolite sets to be considered (default: 25)
 #' @param met.size.threshold.max: Maximum size (in metabolites) for database metabolite sets to be considered (default: 500)
-#' @param random.seed: Random number metaboliterator seed. (default: 123456)
+#' @param random.seed: Random number seed. (default: 123456)
 #' @return report: Global output report, sorted by NES in decreasing order.
 #' @export shiny.getMSEA_Metabolon
 #' @examples
 #' # If the .GMT file isn't already created, create it.
 #' data(Miller2015)
 #' population = rownames(Miller2015)
-#' paths.hsa = list.dirs(path=system.file("extdata", package="CTD"), full.names = FALSE)
+#' paths.hsa = list.dirs(path=system.file("extdata", package="CTDext"), full.names = FALSE)
 #' paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
-#' sink(sprintf("%s/Metabolon.gmt", system.file("extdata/MSEA_Datasets", package="CTD")))
+#' sink(sprintf("%s/Metabolon.gmt", system.file("extdata/MSEA_Datasets", package="CTDext")))
 #' for (p in 1:length(paths.hsa)) {
-#'   load(system.file(sprintf("/extdata/RData/%s.RData", paths.hsa[p]), package="CTD"))
+#'   load(system.file(sprintf("/extdata/RData/%s.RData", paths.hsa[p]), package="CTDext"))
 #'   pathway.compounds = V(ig)$label[which(V(ig)$shape=="circle")]
 #'   pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds %in% population)]))
 #'   print(sprintf("%s         %s", paths.hsa[p], paste(pathCompIDs, collapse="    ")), quote=FALSE)
 #' }
 #' sink()
 #' res = shiny.getMSEA_Metabolon(input, cohorts)
-#'     # The format (columns) for the global result files is as follows.
-#'     Pathway : Pathway name.
-#'     SIZE : Size of the set in metabolites.
-#'     NES : Normalized (multiplicative rescaling) normalized enrichment score.
-#'     NOM p-val : Nominal p-value (from the null distribution of the metabolite set).
-#'     FDR q-val: False discovery rate q-values
-#'     FWER p-val: Family wise error rate p-values.
-#'     glob.p.val: P-value using a global statistic (number of sets above the set's NES).
+#' # The format (columns) for the global result files is as follows.
+#' #     Pathway : Pathway name.
+#' #     SIZE : Size of the set in metabolites.
+#' #     NES : Normalized (multiplicative rescaling) normalized enrichment score.
+#' #     NOM p-val : Nominal p-value (from the null distribution of the metabolite set).
+#' #     FDR q-val: False discovery rate q-values
+#' #     FWER p-val: Family wise error rate p-values.
+#' #     glob.p.val: P-value using a global statistic (number of sets above the set's NES).
 shiny.getMSEA_Metabolon = function(input, cohorts) {
   # First, get the class labels
   class.labels = colnames(.GlobalEnv$data_zscore[,-c(1:8)])
@@ -68,9 +68,9 @@ shiny.getMSEA_Metabolon = function(input, cohorts) {
   # Reorder both data columns and class labels so diseased are first, then controls
   data = data[, order(class.labels, decreasing = TRUE)]
   class.labels = class.labels[order(class.labels, decreasing = TRUE)]
-  # Third, provide the file extension local to the installation of the CTD package for the 
+  # Third, provide the file extension local to the installation of the CTDext package for the 
   # desired pathway knowledgebase .GMT.
-  met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTD")
+  met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTDext")
 
   MSEA.MetaboliteRanking = function(A, class.labels, metabolite.labels, nperm, sigma.correction = "MetaboliteCluster", replace=F) {
     A = A + 0.00000001

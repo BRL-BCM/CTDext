@@ -44,7 +44,7 @@ stat.getMSEA_Metabolon = function(data, class.labels, pathway_knowledgebase = "M
   # Third, provide the file extension local to the installation of the CTDext package for the 
   # desired pathway knowledgebase .GMT.
   if (pathway_knowledgebase=="Metabolon") {
-    met.db = system.file("extdata/MSEA_Datasets/Metabolon.gmt", package="CTDext")
+    met.db = system.file("extdata/Pathway_GMTs/Metabolon.gmt", package="CTDext")
   } else {
     print(sprintf("The .GMT for pathway knowledgebase %s not available at this time.", pathway_knowledgebase))
   }

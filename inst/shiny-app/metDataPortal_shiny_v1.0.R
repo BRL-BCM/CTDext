@@ -12,16 +12,16 @@ require(igraph)
 require(networkD3)
 require(visNetwork)
 require(R.utils)
-require(CTD)
+require(CTDext)
 require(cowplot)
 require(gridExtra)
 require(gtools)
 data("Thistlethwaite2020")
 
-disMod <<- loadToEnv(system.file(sprintf("shiny-app/disMod_July2020.RData"), package = "CTD"))[["disMod"]]
-modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTD")),function(x) sub("[0-9]+-ranks.RData","",x))))
+disMod <<- loadToEnv(system.file(sprintf("shiny-app/disMod_Oct2020.RData"), package = "CTDext"))[["disMod"]]
+modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTDext")),function(x) sub("[0-9]+-ranks.RData","",x))))
 
-source(system.file("shiny-app/metDataPortal_appFns.r",package = "CTD"))
+source(system.file("shiny-app/metDataPortal_appFns.r",package = "CTDext"))
 cohorts_coded <<- lapply(cohorts_coded, mixedsort, decreasing=TRUE)
 
 pwy_choices = c("Choose", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism", "BCAA Metabolism",

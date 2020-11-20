@@ -20,11 +20,11 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
   if (is.null( Pathway.Name)) Pathway.Name = gsub(" ", "-", input$pathwayMapId)
 
   if (Pathway.Name=="All") {
-    load(system.file("extdata/RData/allPathways.RData", package="CTD"))
+    load(system.file("extdata/RData/allPathways.RData", package="CTDext"))
     V(ig)$label[which(V(ig)$label %in% c("DSGEGDFXAEGGGVR", "Dsgegdfxaegggvr"))] = ""
     Pathway.Name = "allPathways"
   } else {
-    load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTD"))
+    load(system.file(sprintf("extdata/RData/%s.RData", Pathway.Name), package="CTDext"))
   }
   template.ig = ig
 

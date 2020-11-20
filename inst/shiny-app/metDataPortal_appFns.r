@@ -1,6 +1,6 @@
 getData = function(input) {
   print("called getData()...")
-  data = .GlobalEnv$data_zscore[,-c(1:8)]
+  data = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
   pts = as.character(unlist(sapply(input$showThese, function(i) cohorts_coded[[i]])))
   ind = which(colnames(data) %in% pts)
   data = data[,ind]
@@ -38,7 +38,7 @@ getPathwayMap = function(input) {
   #' @param patient.zscore - A named vector of metabolites with corresponding z-scores.
   #' @param scalingFactor - Integer associated with increase in node size.
   #' @param outputFilePath - The directory in which you want to store image files.
-  zscore.data = .GlobalEnv$data_zscore[,-c(1:8)]
+  zscore.data = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
 
   if (length(input$ptIDs)==0) {
     return(list(pmap = NULL, colorbar = NULL))
@@ -197,7 +197,7 @@ getPathwayMap = function(input) {
 getPatientReport = function(input) {
   # Must display RAW, Anchor and Z-score values for all patients in input$ptIDs.
   # If in Miller2015 data, there are no raw and anchor values.
-  zscore.data = .GlobalEnv$data_zscore
+  zscore.data = .GlobalEnv$Thistlethwaite2020
   tmp = rownames(zscore.data)
   zscore.data = apply(as.matrix(zscore.data[,which(colnames(zscore.data) %in% input$ptIDs)]), 1, function(i) mean(na.omit(i)))
   names(zscore.data) = tmp
@@ -241,11 +241,11 @@ getPatientReport = function(input) {
   # Find metabolites that were not detected but are normally detected:
   #      Metabolites with higher fill rate (>80%) should be detected.
   if (any(grep("^HEP", input$ptIDs))) {
-    refs = .GlobalEnv$data_zscore[, grep("HEP-REF", colnames(.GlobalEnv$data_zscore))]
+    refs = .GlobalEnv$Thistlethwaite2020[, grep("HEP-REF", colnames(.GlobalEnv$Thistlethwaite2020))]
     ref.fil = Miller2015$`Times identifed in all 200 samples`/200
     names(ref.fil)=rownames(Miller2015)
   } else {
-    refs = .GlobalEnv$data_zscore[, grep("EDTA-REF", colnames(.GlobalEnv$data_zscore))]
+    refs = .GlobalEnv$Thistlethwaite2020[, grep("EDTA-REF", colnames(.GlobalEnv$Thistlethwaite2020))]
     ref.fil = 1-apply(refs, 1, function(i) sum(is.na(i))/length(i))
   }
   tmp = ref.fil[which(names(ref.fil) %in% ind0)]
@@ -309,7 +309,7 @@ getMSEA = function(input, cohorts_coded) {
 #### TAB 3 (INSPECT REFERENCE POPULATION) FUNCTIONS ####
 getMetList = function(input) {
   # First, get rid of metabolites that have below fil rate
-  ref = .GlobalEnv$data_zscore[,-c(1:8)]
+  ref = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
   if (input$anticoagulant=="EDTA") {
     ref = ref[,grep("EDTA-REF", colnames(ref))]
     ref.fil = 1-apply(ref, 1, function(i) sum(is.na(i))/length(i))
@@ -352,7 +352,7 @@ neg = function(x) { return(-x) }
 # Get reference population statistics & plots
 getRefPop = function(input) {
   print("getRefPop() called.")
-  ref = .GlobalEnv$data_zscore[,-c(1:8)]
+  ref = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
   if (input$anticoagulant=="EDTA") {
     ref = ref[,grep("EDTA-REF", colnames(ref))]
     ref.fil = 1-apply(ref, 1, function(i) sum(is.na(i))/length(i))
@@ -474,7 +474,7 @@ getVlength <<- function(input){
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
 
-  data_mx = as.matrix(.GlobalEnv$data_zscore[which(rownames(.GlobalEnv$data_zscore) %in% V(ig)$name), ])
+  data_mx = as.matrix(.GlobalEnv$Thistlethwaite2020[which(rownames(.GlobalEnv$Thistlethwaite2020) %in% V(ig)$name), ])
   data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
 
   zmets=data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID]
@@ -515,7 +515,7 @@ getPtResult=function(input){
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
   #adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
-  data_mx = as.matrix(.GlobalEnv$data_zscore[which(rownames(.GlobalEnv$data_zscore) %in% V(ig)$name), ])
+  data_mx = as.matrix(.GlobalEnv$Thistlethwaite2020[which(rownames(.GlobalEnv$Thistlethwaite2020) %in% V(ig)$name), ])
   data_mx = suppressWarnings(apply(data_mx, c(1,2), as.numeric))
 
   # using single-node diffusion

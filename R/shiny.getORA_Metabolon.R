@@ -17,12 +17,12 @@ shiny.getORA_Metabolon = function(input) {
   # The size of the population of total possible metabolites to draw from
   population = names(met.profile)
   print(sprintf("Total number of metabolites in profile. = %d.", length(population)))
-  paths.hsa = list.dirs(path=system.file("extdata", package="CTD"), full.names = FALSE)
+  paths.hsa = list.dirs(path=system.file("extdata", package="CTDext"), full.names = FALSE)
   paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
   row = 1
   pathway.data = data.frame(Pathway=character(), Size=integer(), Hits=integer(), FDR=numeric(), Pvalue=numeric(), stringsAsFactors = FALSE)
   for (pathway in 1:length(paths.hsa)) {
-    load(system.file(sprintf("extdata/RData/%s.RData", paths.hsa[pathway]), package="CTD"))
+    load(system.file(sprintf("extdata/RData/%s.RData", paths.hsa[pathway]), package="CTDext"))
 
     pathway.compounds = tolower(V(ig)$label[which(V(ig)$shape=="circle")])
     pathCompIDs = unique(tolower(pathway.compounds[which(pathway.compounds %in% population)]))

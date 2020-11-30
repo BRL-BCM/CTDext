@@ -29,7 +29,7 @@ shiny.getPathwayIgraph = function(input, Pathway.Name) {
   template.ig = ig
 
   # Load id to node types mappings
-  nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTD"), header=TRUE, sep="\n", check.names = FALSE)
+  nodeType = read.table(system.file(sprintf("extdata/%s/Type-%s.txt", Pathway.Name, Pathway.Name), package="CTDext"), header=TRUE, sep="\n", check.names = FALSE)
   tmp = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[2])
   tmp.nms = apply(nodeType, 1, function(i) unlist(strsplit(i, split= " = "))[1])
   ind = suppressWarnings(as.numeric(tmp.nms))

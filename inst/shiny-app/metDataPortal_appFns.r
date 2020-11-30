@@ -299,7 +299,7 @@ getPatientReport = function(input) {
 #  rm(msea_result)
 #}
 #save(msea, file="/Users/lillian.rosa/Downloads/CTD/inst/shiny-app/shiny_msea.RData")
-load(system.file("shiny-app/shiny_msea.RData",package = "CTD"))
+load(system.file("shiny-app/shiny_msea.RData",package = "CTDext"))
 getMSEA = function(input, cohorts_coded) {
   return(msea[[input$diagClass]])
 }
@@ -431,7 +431,7 @@ rampred <<- function(numdata){
 getPrankDf=function(input){
   # get disease cohort p-value ranking dataframe
   pts = cohorts_coded[[input$diag_nw_Class]]
-  load(system.file(sprintf("shiny-app/model/ptRanks_kmx30.RData"), package = "CTD")) 
+  load(system.file(sprintf("shiny-app/model/ptRanks_kmx30.RData"), package = "CTDext")) 
   if (input$pvalueType=="CTD") {
     df.pranks = sapply(match(pts,names(pt_ranks)), function(x) getColumn(pt_ranks[[x]],"ctd","model"))
   } else if (input$pvalueType=="CTDdm") {
@@ -463,13 +463,13 @@ getVlength <<- function(input){
   if (model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
-    if (system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD') != ""){
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    if (system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTDext') != ""){
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTDext'))[['ig_pruned']]
     } else{
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTDext'))[['ig_pruned']]
     }
   } else{
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTDext'))[['ig_pruned']]
   }
   G = vector(mode="list", length=length(V(ig)$name))
   names(G) = V(ig)$name
@@ -503,13 +503,13 @@ getPtResult=function(input){
   if (model==getDiag){
     fold=which(cohorts_coded[[getDiag]]==ptID)
     # load latent-embedding, pruned network that is learnt from the rest of the patients diagnosed with the same disease.
-    if (system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD') != ""){
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTD'))[['ig_pruned']]
+    if (system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTDext') != ""){
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,fold), package='CTDext'))[['ig_pruned']]
     } else{
-      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+      ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTDext'))[['ig_pruned']]
     }
   } else{
-    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTD'))[['ig_pruned']]
+    ig = loadToEnv(system.file(sprintf('networks/ind_foldNets/bg_%s_fold%d.RData',model,1), package='CTDext'))[['ig_pruned']]
   }
   # get "ig" derived adjacency matrix
   G = vector(mode="list", length=length(V(ig)$name))
@@ -521,7 +521,7 @@ getPtResult=function(input){
   # using single-node diffusion
   kmx = 30
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile
-  ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTD'))[["permutationByStartNode"]]
+  ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTDext'))[["permutationByStartNode"]]
   ranks = lapply(ranks, tolower)
   ptBSbyK = singleNode.getPtBSbyK(names(S), ranks) # encode nodes
   res = mle.getEncodingLength(ptBSbyK, NULL, ptID, G) # get encoding length

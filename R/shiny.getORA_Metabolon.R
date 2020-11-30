@@ -5,7 +5,7 @@
 #' @examples
 #' pathway.data = shiny.getORA_Metabolon(met.profile, threhold=3, "z-score", NULL)
 shiny.getORA_Metabolon = function(input) {
-  data = .GlobalEnv$data_zscore
+  data = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
   tmp = rownames(data)
   met.profile = apply(as.matrix(data[,which(colnames(data) %in% input$ptIDs)]), 1, mean)
   names(met.profile) = tmp
@@ -18,7 +18,7 @@ shiny.getORA_Metabolon = function(input) {
   population = names(met.profile)
   print(sprintf("Total number of metabolites in profile. = %d.", length(population)))
   paths.hsa = list.dirs(path=system.file("extdata", package="CTDext"), full.names = FALSE)
-  paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets"))]
+  paths.hsa = paths.hsa[-which(paths.hsa %in% c("", "RData", "allPathways", "MSEA_Datasets", "Pathway_GMTs"))]
   row = 1
   pathway.data = data.frame(Pathway=character(), Size=integer(), Hits=integer(), FDR=numeric(), Pvalue=numeric(), stringsAsFactors = FALSE)
   for (pathway in 1:length(paths.hsa)) {

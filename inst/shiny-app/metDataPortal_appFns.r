@@ -523,7 +523,7 @@ getPtResult=function(input){
   S = data_mx[order(abs(data_mx[,ptID]), decreasing = TRUE),ptID][1:kmx] # top kmx perturbed metabolites in ptID's profile
   ranks = loadToEnv(system.file(sprintf('ranks/ind_ranks/%s%d-ranks.RData',toupper(model), 1), package='CTDext'))[["permutationByStartNode"]]
   ranks = lapply(ranks, tolower)
-  ptBSbyK = singleNode.getPtBSbyK(names(S), ranks) # encode nodes
+  ptBSbyK = mle.getPtBSbyK(names(S), ranks) # encode nodes
   res = mle.getEncodingLength(ptBSbyK, NULL, ptID, G) # get encoding length
   mets = unique(c(names(S), names(ptBSbyK[[which.max(res[,"d.score"])]]))) # best co-perturbed metabolite set is the most compressed subset of nodes
   p.mets=2^-(res[which.max(res[,"d.score"]),"d.score"]-log2(nrow(res))) # p value of this "modular perturbation"

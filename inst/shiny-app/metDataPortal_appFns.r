@@ -323,7 +323,7 @@ getMetList = function(input) {
   ref = ref[which(ref.fil>0.66),]
   ref.fil = ref.fil[which(ref.fil>0.66)]
   print(dim(ref))
-  metClass = data_zscore[which(rownames(data_zscore) %in% names(ref.fil)), "SUPER_PATHWAY"]
+  metClass = Thistlethwaite2020[which(rownames(Thistlethwaite2020) %in% names(ref.fil)), "SUPER_PATHWAY"]
   metClass[which(metClass %in% c("?", ""))] = "Unknown"
 
   if (input$metClass=="Lipid") {

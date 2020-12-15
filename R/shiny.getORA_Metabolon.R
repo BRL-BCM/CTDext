@@ -1,4 +1,4 @@
-#' Metabolite set enrichment analysis (MSEA) (using a hypergeometric test) using pathway knowledge curated by Metabolon
+#' Over-representation analysis (ORA) (using a hypergeometric test) using pathway knowledge curated by Metabolon
 #'
 #' A function that returns the pathway enrichment score for all perturbed metabolites in a patient's full metabolomic profile.
 #' @export shiny.getORA_Metabolon

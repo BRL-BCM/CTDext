@@ -19,12 +19,15 @@ require(gridExtra)
 require(gtools)
 data("Thistlethwaite2020")
 
-Thistlethwaite2020.raw = loadToEnv(system.file("shiny-app/Thistlethwaite2020.raw.RData",package = "CTDext"))[["data_raw"]]
+Thistlethwaite2020.raw <<- loadToEnv(system.file("shiny-app/Thistlethwaite2020.raw.RData",package = "CTDext"))[["data_raw"]]
 disMod <<- loadToEnv(system.file(sprintf("shiny-app/disMod_Oct2020.RData"), package = "CTDext"))[["disMod"]]
 modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTDext")),function(x) sub("[0-9]+-ranks.RData","",x))))
-
+where <- function(name, env = parent.frame()) {
+  if (identical(env, emptyenv())) {stop("Can't find ", name, call. = FALSE)} else if (exists(name, envir = env, inherits = FALSE)) {env} else {where(name, parent.env(env))}
+}
+unlockBinding("cohorts_coded",where("cohorts_coded"))
+cohorts_coded <<- lapply(cohorts_coded, mixedsort, decreasing=TRUE)
 source(system.file("shiny-app/metDataPortal_appFns.r",package = "CTDext"))
-cohorts_coded <- lapply(cohorts_coded, mixedsort, decreasing=TRUE)
 
 pwy_choices = c("Choose", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism", "BCAA Metabolism",
                 "Benzoate Metabolism", "Beta-Oxidation", "Bile-Acid Metabolism", "Carnitine Biosynthesis",
@@ -100,7 +103,7 @@ ui = dashboardPage(
                            pickerInput(inputId = "procLevel", label = "Processing level",choices = c("raw","z-score"),
                                        selected = "z-score"),
                            pickerInput(inputId = "showThese", label = "Diagnoses",choices = names(cohorts_coded)[-which(names(cohorts_coded) %in% c("hep_refs", "edta_refs"))],
-                                       selected = names(cohorts_coded)[1],options = list(`actions-box` = TRUE),inline=FALSE,multiple = FALSE),
+                                       selected = names(cohorts_coded)[1],options = list(`actions-box` = TRUE),inline=FALSE,multiple = TRUE),
                            h4(htmlOutput("st")), downloadButton("downloadButton", "Download"), dataTableOutput("selectedData")))) # tabItem download
     ) # tabItems
   ) # dashboardBody

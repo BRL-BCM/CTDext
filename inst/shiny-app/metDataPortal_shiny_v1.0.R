@@ -19,11 +19,12 @@ require(gridExtra)
 require(gtools)
 data("Thistlethwaite2020")
 
+Thistlethwaite2020.raw = loadToEnv(system.file("shiny-app/Thistlethwaite2020.raw.RData",package = "CTDext"))[["data_raw"]]
 disMod <<- loadToEnv(system.file(sprintf("shiny-app/disMod_Oct2020.RData"), package = "CTDext"))[["disMod"]]
 modelChoices <<- tolower(unique(sapply(list.files(system.file("ranks/ind_ranks",package = "CTDext")),function(x) sub("[0-9]+-ranks.RData","",x))))
 
 source(system.file("shiny-app/metDataPortal_appFns.r",package = "CTDext"))
-cohorts_coded <<- lapply(cohorts_coded, mixedsort, decreasing=TRUE)
+cohorts_coded <- lapply(cohorts_coded, mixedsort, decreasing=TRUE)
 
 pwy_choices = c("Choose", "Arginine Metabolism", "Ascorbate Metabolism", "Asp-Glu Metabolism", "BCAA Metabolism",
                 "Benzoate Metabolism", "Beta-Oxidation", "Bile-Acid Metabolism", "Carnitine Biosynthesis",
@@ -96,9 +97,11 @@ ui = dashboardPage(
       tabItem(tabName="download",
               h2("Download Data", align="center"),
               fluidRow(box(title="Download Data", status="info", solidHeader=TRUE, align="left", width=12, collapsible=FALSE,
+                           pickerInput(inputId = "procLevel", label = "Processing level",choices = c("raw","z-score"),
+                                       selected = "z-score"),
                            pickerInput(inputId = "showThese", label = "Diagnoses",choices = names(cohorts_coded)[-which(names(cohorts_coded) %in% c("hep_refs", "edta_refs"))],
-                                       selected = names(cohorts_coded)[1],options = list(`actions-box` = TRUE),inline=FALSE,multiple = TRUE),
-                           h4(textOutput("st")), downloadButton("downloadButton", "Download"), dataTableOutput("selectedData")))) # tabItem download
+                                       selected = names(cohorts_coded)[1],options = list(`actions-box` = TRUE),inline=FALSE,multiple = FALSE),
+                           h4(htmlOutput("st")), downloadButton("downloadButton", "Download"), dataTableOutput("selectedData")))) # tabItem download
     ) # tabItems
   ) # dashboardBody
 ) # dashboardPage
@@ -219,15 +222,27 @@ server = function(input, output, session) {
       output$howRare = renderPlot(ref()$rare)
       output$refOutliers = renderDataTable(ref()$outliers)
     } else if (input$tab == "download") {
-      observeEvent(input$showThese, priority = 0, {
-        dd = getData(input)
-        output$downloadButton = downloadHandler(
-          filename = function() { paste(paste(input$showThese, collapse="_"), ".txt", sep="") },
-          content = function(file) { write.table(dd, file, sep="\t", col.names = TRUE, row.names = FALSE) }
-        )
-        output$selectedData = DT::renderDataTable({DT::datatable(dd, rownames=FALSE, options=list(scrollX=TRUE))})
+      observeEvent(input$procLevel,priority = 0,{
+        if(input$procLevel=="z-score"){
+          updatePickerInput(session,"showThese", choices = names(cohorts_coded)[-which(names(cohorts_coded) %in% c("hep_refs", "edta_refs"))],
+                            selected = names(cohorts_coded)[1])
+        }else if(input$procLevel=="raw"){
+          cohorts_coded.raw=sapply(cohorts_coded,function(x) x[x %in% colnames(.GlobalEnv$Thistlethwaite2020.raw)])
+          cohorts_coded.raw=cohorts_coded.raw[sapply(cohorts_coded.raw, length)>0]
+          updatePickerInput(session,"showThese", choices = names(cohorts_coded.raw)[-which(names(cohorts_coded.raw) %in% c("hep_refs", "edta_refs"))],
+                            selected = names(cohorts_coded.raw)[1])
+        }
+        observeEvent(input$showThese, priority = 1, {
+          dd = getData(input)
+          output$downloadButton = downloadHandler(
+            filename = function() { paste(paste(input$showThese, collapse="_"),"_",input$procLevel,".txt", sep="") },
+            content = function(file) { write.table(dd, file, sep="\t", col.names = TRUE, row.names = FALSE) }
+          )
+          output$selectedData = DT::renderDataTable({DT::datatable(dd, rownames=FALSE, options=list(scrollX=TRUE))})
+        })
       })
-      output$st = renderText({sprintf("Selected Cohort: %s",paste(input$showThese,collapse = ", "))})
+
+      output$st = renderUI({HTML(sprintf("Selected Cohort: %s <br/> Selected Level: %s",paste(input$showThese,collapse = ", "),paste(input$procLevel,collapse = ", ")))})
     } else {
       print("No tab selected")
     }

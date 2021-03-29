@@ -1,14 +1,21 @@
 getData = function(input) {
   print("called getData()...")
-  data = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
-  pts = as.character(unlist(sapply(input$showThese, function(i) cohorts_coded[[i]])))
-  ind = which(colnames(data) %in% pts)
+  if (input$procLevel=="z-score"){
+    data = .GlobalEnv$Thistlethwaite2020[,-c(1:8)]
+    pts = as.character(unlist(sapply(input$showThese, function(i) cohorts_coded[[i]])))
+    ind = which(colnames(data) %in% pts)
+  } else if (input$procLevel=="raw"){
+    data = .GlobalEnv$Thistlethwaite2020.raw
+    cohorts_coded.raw=sapply(cohorts_coded,function(x) x[x %in% colnames(.GlobalEnv$Thistlethwaite2020.raw)])
+    cohorts_coded.raw=cohorts_coded.raw[sapply(cohorts_coded.raw, length)>0]
+    pts = as.character(unlist(sapply(input$showThese, function(i) cohorts_coded.raw[[i]])))
+    ind = which(colnames(data) %in% pts)
+  }
   data = data[,ind]
   data = apply(data, c(1,2), function(i) round(i, 2))
   res = cbind(rownames(data), data)
   colnames(res) = c("Metabolite", colnames(data))
   res = as.matrix(res)
-
   print(sprintf("getData() outputted res dim = %d x %d", dim(res)[1], dim(res)[2]))
 
   return(res)

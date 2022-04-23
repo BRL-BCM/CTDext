@@ -1,6 +1,6 @@
 ---
 title: "Clinical Paper"
-author: "Xiqi Li"
+author: "Thistlethwaite LR & Li X"
 date: "2/18/2022"
 output: 
   html_document:

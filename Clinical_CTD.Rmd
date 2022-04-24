@@ -53,29 +53,12 @@ temp=data_mx.og[,dupNames[,1]]
 colnames(temp)=dupNames[,2]
 data_mx.og=cbind(data_mx.og,temp)
 
-# list disease models (* I provide the object cohorts where all sample orders match to github LOO graphs,ranks; if you do not want to use gitub files, do 71-75)
-  # cohorts=loadToEnv("../clinical_data_Oct2020.RData")[["cohorts"]]
-  # load("../clnms_map-macbook.RData")
-  # cohorts.2=list()
-  # clnms_map.0=clnms_map
-  # for(name in names(cohorts)){
-  #   if(name!="maps"){
-  #     clnms_map=clnms_map.0[!grepl("ALAIMO",clnms_map.0[,2]),]
-  #     cohorts.2[[name]]=clnms_map[,2][match(cohorts[[name]],clnms_map[,1])]
-  #     # rm(clnms_map)
-  #   }else{
-  #     clnms_map=clnms_map.0
-  #     cohorts.2[[name]]=clnms_map[,2][match(cohorts[[name]],clnms_map[,1])]
-  #     # rm(clnms_map)
-  #   }
-  # }
-cohorts=loadToEnv("cohorts.RData")[["cohorts.2"]]
-data_mx.og=data_mx.og[,unlist(cohorts)]
-# models=sort(c("zsd","rcdp","arg","otc","asld","abat","aadc","adsl","cit","cob","ga","gamt","msud","mma","pa","pku"))
-# cohorts=sapply(c(models,"hep-ref", "edta-ref", "alaimo"),
-#                function(x) grep(paste(x,"-",sep = ""),colnames(data_mx.og),value = T,ignore.case = T))
-# names(cohorts)[names(cohorts)=="hep-ref"]="hep_refs"
-# names(cohorts)[names(cohorts)=="edta-ref"]="edta_refs"
+
+models=sort(c("zsd","rcdp","arg","otc","asld","abat","aadc","adsl","cit","cob","ga","gamt","msud","mma","pa","pku"))
+cohorts=sapply(c(models,"hep-ref", "edta-ref", "alaimo"),
+               function(x) grep(paste(x,"-",sep = ""),colnames(data_mx.og),value = T,ignore.case = T))
+names(cohorts)[names(cohorts)=="hep-ref"]="hep_refs"
+names(cohorts)[names(cohorts)=="edta-ref"]="edta_refs"
 
 
 

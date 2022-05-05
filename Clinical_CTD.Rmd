@@ -34,7 +34,6 @@ require(CTDext)
 require(openxlsx)
 url="https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-022-10415-5/MediaObjects/41598_2022_10415_MOESM2_ESM.xlsx"
 download.file(url,destfile = "data_mx.xlsx")
-
 data_mx.og=read.xlsx("data_mx.xlsx",
                   sheet = "Z-score",startRow = 2,
                   colNames = T,rowNames = T,skipEmptyRows = TRUE,skipEmptyCols = TRUE,)
@@ -42,7 +41,6 @@ data_mx.og=data_mx.og[
   ,!colnames(data_mx.og) %in% c("PATHWAY_SORTORDER", "SUPER_PATHWAY", "SUB_PATHWAY",
                                 "CHEMICAL_ID", "RI", "MASS",
                                 "PUBCHEM", "CAS", "KEGG", "HMDB_ID" )]
-
 # 6 alaimo samples with diseases diagnosed were also used for model training
 dupNames=matrix(nrow = 6, ncol = 2)
 dupNames[,1]=c(
@@ -52,16 +50,11 @@ dupNames[,2]=c(
 temp=data_mx.og[,dupNames[,1]]
 colnames(temp)=dupNames[,2]
 data_mx.og=cbind(data_mx.og,temp)
-
-
 models=sort(c("zsd","rcdp","arg","otc","asld","abat","aadc","adsl","cit","cob","ga","gamt","msud","mma","pa","pku"))
 cohorts=sapply(c(models,"hep-ref", "edta-ref", "alaimo"),
                function(x) grep(paste(x,"-",sep = ""),colnames(data_mx.og),value = T,ignore.case = T))
 names(cohorts)[names(cohorts)=="hep-ref"]="hep_refs"
 names(cohorts)[names(cohorts)=="edta-ref"]="edta_refs"
-
-
-
 # binary code argininosuccinate
 data_mx.raw=read.xlsx(system.file("dataset/dataset1.xlsx",package = "CTDext"),
                   sheet = "Raw intensity",startRow = 2,
@@ -71,11 +64,9 @@ ptZeroFromRaw=colnames(data_mx.raw[,is.na(unlist(data_mx.raw["argininosuccinate"
 pt10FromRaw=colnames(data_mx.raw[,!is.na(unlist(data_mx.raw["argininosuccinate",]))])
 temp=data_mx.og[,!colnames(data_mx.og) %in% colnames(data_mx.raw)]
 ptZeroFromOg=colnames(temp)[ is.na(unlist(temp["argininosuccinate",]))| as.numeric(unlist(temp["argininosuccinate",]))==0]
-
 data_mx.ogBnry=data_mx.og # Jul
 data_mx.ogBnry["argininosuccinate",c(ptZeroFromRaw,ptZeroFromOg)]=0
 data_mx.ogBnry["argininosuccinate",pt10FromRaw]=10 
-
 # data_mx.og: load("clinical_data_July2020.RData")
 # data_mx.ogBnry : "clinical_data_Oct2020.RData"
 rm(list=setdiff(ls(),grep("dir|data_mx|cohorts|dupNames",ls(),value = T))) 
@@ -106,7 +97,7 @@ max(zscore_cts)
 
 
 ## Building a Gaussian Graphical Model to Diagnose 16 Different Metabolic Disorders (skip if using github-saved networks)
-Metabolites represented in at least 50% of reference and 50% of disease cases were included in network learning.
+Metabolites represented in at least 50% of reference and 50% of disease cases were included in network learning. This is a time-consuming step
 ``` {r learn-nets_heparin}
 require(R.utils)
 require(CTD)
@@ -117,19 +108,6 @@ cohorts=loadToEnv("clinical_data.RData")[["cohorts"]]
 data_mx=data_mx[,grep("hep-",colnames(data_mx),ignore.case = T)]
 data_mx=data_mx[rowSums(is.na(data_mx)) != ncol(data_mx),]
 
-# data("Miller2015")
-# data_mx = Miller2015[,c("Times identifed in all 200 samples",grep("IEM", colnames(Miller2015),value = T))]
-# diagnosis = Miller2015[1,grep("IEM", colnames(Miller2015),)]
-# data_mx = data_mx[-1,]
-# ind = grep("x - ", rownames(data_mx))
-# data_mx = data_mx[-ind,]
-# ref_fill = as.numeric(Miller2015$`Times identifed in all 200 samples`[-1])/200
-# names(ref_fill)=rownames(Miller2015)[-1]
-# data_mx = data_mx[,grep("IEM", colnames(data_mx))]
-# refs = data_mx[,grep("No biochemical genetic diagnosis",diagnosis)]
-# refs2 = refs[which(ref_fill>0.8),]
-# cohorts = lapply(cohorts, function(i) i[which(i %in% colnames(Miller2015))])
-
 refs=data_mx[,grep("ref",colnames(data_mx),ignore.case = T)]
 ref_fill = apply(refs, 1, function(i) sum(is.na(i))/length(i))
 
@@ -137,8 +115,8 @@ ref_fill = apply(refs, 1, function(i) sum(is.na(i))/length(i))
 refs2=refs
 cohorts = lapply(cohorts, function(i) i[which(i %in% colnames(data_mx))])
 
-# We perfer training models on edta samples for various reasons (latest dataset); here we train cohorts that only contains heparin samples
-for (model in c("cit", "msud", "mma", "pa", "pku", "cob", "ga", "gamt")) {
+# We perfer training models on edta samples for various reasons (latest dataset); here we show an example of network learning on Citrullinemia disease that only contains heparin samples; include "msud", "mma", "pa", "pku", "cob", "ga", "gamt" if you want to train all 8 models
+for (model in c("cit")) { #, "msud", "mma", "pa", "pku", "cob", "ga", "gamt"
   for (fold in 1:length(cohorts[[model]])) {
     print(sprintf("Learning graphs for diag %s, fold %d...", model, fold))
     diag_pts = cohorts[[model]][-fold]
@@ -197,8 +175,8 @@ refs = data_mx[, which(colnames(data_mx) %in% cohorts$edta_refs)]
 ref_fill = apply(refs, 1, function(i) sum(is.na(i))/length(i))
 cohorts = lapply(cohorts, function(i) i[which(i %in% colnames(data_mx))])
 
-
-for (model in c("asld", "aadc", "abat", "adsl", "arg","zsd", "rcdp","otc")) {#,
+# here we show an example of training one disease cohort that only contains EDTA samples; include "aadc", "abat", "adsl", "arg","zsd", "rcdp","otc" if you want to train all edta models
+for (model in c("asld")) {#,"aadc", "abat", "adsl", "arg","zsd", "rcdp","otc"
   for (fold in 1:length(cohorts[[model]])) {
     print(sprintf("Learning graphs for diag %s, fold %d...", model, fold))
     diag_pts = cohorts[[model]][-fold]
@@ -257,37 +235,220 @@ for (model in c("arg", "asld", "cit", "otc", "rcdp", "zsd", "abat", "aadc", "ads
 ```
 
 ## Get pre-compute ranks for each Gaussian Graphical Model. (skip if using github-saved ranks)
-This part should preferably run on cluster (pbs system)
+This part should preferably run on cluster (pbs system).
+Scripts "wrapper_ranks.r" "getRanksN.r" "getRanks.pbs" are commented out.
 ```{r get-PreComputed-ranks}
+# 
+# cohorts=loadToEnv("clinical_data.RData")[["cohorts"]]
+# models=c(c("asld", "aadc", "abat", "adsl", "arg","zsd", "rcdp","otc"))
+# cohorts[models]=sapply(models, function(x) grep("edta",cohorts[[x]],ignore.case = T,value = T))
+# cohorts[["alaimo"]]=NULL
+# 
+# for (model in models){
+#   fold.begin=1
+#   fold.end=length(cohorts[[model]])
+#   system(sprintf("Rscript wrapper_ranks.r %s %s %s %s %s",
+#                model, fold.begin, fold.end, w.dir, rank.dir, graph.dir))
+# }
 
-cohorts=loadToEnv("clinical_data.RData")[["cohorts"]]
-models=c(c("asld", "aadc", "abat", "adsl", "arg","zsd", "rcdp","otc"))
-cohorts[models]=sapply(models, function(x) grep("edta",cohorts[[x]],ignore.case = T,value = T))
-cohorts[["alaimo"]]=NULL
+######################################## wrapper_ranks.r ########################################
+# require(R.utils)
+# require(igraph)
+# args = commandArgs(trailingOnly=TRUE)
+# model=as.character(args[1])
+# fold.begin=as.numeric(args[2])
+# fold.end=as.numeric(args[3])
+# w.dir=as.character(args[4])
+# rank.dir=as.character(args[5])
+# graph.dir=as.character(args[6])
+# diag=model
+# setwd(sprintf("%s/%s",w.dir,rank.dir))
+# 
+# for (fold in fold.begin:fold.end){
+#     dir.create(sprintf("./%s", model), showWarnings = FALSE)
+#     output_dir = sprintf("./%s/diag%s%d", model,diag,fold)
+#     str = sprintf("mkdir %s", output_dir)
+#     system(str)
+# 
+# ig = loadToEnv(sprintf("../%s/bg_%s_fold%d.RData",graph.dir,model,fold))[["ig_pruned"]]
+# 
+# totalN = length(V(ig)$name)
+# print(sprintf("Total N = %d", totalN))
+# 
+# for (n in 1:totalN) {
+#   str = sprintf("qsub -v diag=%s,fold=%d,n=%d,wkdir=%s,rankdir=%s,graphdir=%s getRanks.pbs",
+#                 diag, fold, n, w.dir, rank.dir, graph.dir)
+#   system(str, wait=FALSE)
+#   system("sleep 0.1")
+# }
+# 
+#   
+# ready=FALSE
+# last_sum = 0
+# while (!ready) {
+#   f = list.files(sprintf("./%s/diag%s%d", model, diag, fold), pattern=".RData")
+#   print(sprintf("#permutation files ready = %d", length(f)))
+#   if (length(f)==totalN) {
+#     ready=TRUE
+#   } else {
+#     system("sleep 30")
+#     system("rm *.pbs.*")
+#     curr_sum = length(f)
+#     if (curr_sum > last_sum) {
+#       last_sum = curr_sum
+#     } 
+#   }
+# }
+# system("rm *.pbs.*")
+#   
+# # collate permutations into one R object
+# all_nodes = V(ig)$name
+# permutationByStartNode = list()
+# for (n in 1:length(all_nodes)) {
+#   load(sprintf("./%s/diag%s%d/%d.RData",model, diag, fold, n))
+#   permutationByStartNode[[n]] = toupper(current_node_set)
+# }
+# names(permutationByStartNode) = all_nodes
+# save.image(file=sprintf("./%s/%s%d-ranks.RData",model, toupper(diag), fold))
+# print("collate complete...")
+# str = sprintf("rm -r ./%s/diag%s%d",model, diag, fold)
+# system(str)
+# 
+# }
 
-for (model in models){
-  fold.begin=1
-  fold.end=length(cohorts[[model]])
-  system(sprintf("Rscript wrapper_ranks.r %s %s %s %s %s",
-               model, fold.begin, fold.end, w.dir, rank.dir, graph.dir))
-}
+################################ end of wrapper_ranks.r #########################################
+
+
+################################ getRanksN.r ################################################
+# require(igraph)
+# require(CTD)
+# require(R.utils)
+# singleNode.getNodeRanksN = function(n, G, S=NULL, num.misses=NULL, verbose=FALSE) {
+#   if (!is.null(num.misses)) {
+#     if (is.null(S)) {
+#       print("You must supply a subset of nodes as parameter S if you supply num.misses.")
+#       return(0)
+#     }
+#   }
+#   all_nodes = names(G)
+#   if (verbose) {
+#     print(sprintf("Calculating node rankings %d of %d.", n, length(all_nodes)))
+#   }
+#   current_node_set = NULL
+#   stopIterating=FALSE
+#   startNode = all_nodes[n]
+#   currentGraph = G
+#   numMisses = 0
+#   current_node_set = c(current_node_set, startNode)
+#   while (stopIterating==FALSE) {
+#     # Clear probabilities
+#     currentGraph[1:length(currentGraph)] = 0 #set probabilities of all nodes to 0
+#     #determine base p0 probability
+#     baseP = p0/(length(currentGraph)-length(current_node_set))
+#     #set probabilities of unseen nodes to baseP
+#     currentGraph[!(names(currentGraph) %in% current_node_set)] = baseP
+#     # Sanity check. p0_event should add up to exactly p0 (global variable)
+#     p0_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
+#     currentGraph = graph.diffuseP1(p1, startNode, currentGraph, current_node_set, 1, verbose=FALSE)
+#     # Sanity check. p1_event should add up to exactly p1 (global variable)
+#     p1_event = sum(unlist(currentGraph[!(names(currentGraph) %in% current_node_set)]))
+#     if (abs(p1_event-1)>thresholdDiff) {
+#       extra.prob.to.diffuse = 1-p1_event
+#       currentGraph[names(current_node_set)] = 0
+#       currentGraph[!(names(currentGraph) %in% names(current_node_set))] = unlist(currentGraph[!(names(currentGraph) %in% names(current_node_set))]) + extra.prob.to.diffuse/sum(!(names(currentGraph) %in% names(current_node_set)))
+#     }
+#     #Set startNode to a node that is the max probability in the new currentGraph
+#     maxProb = names(which.max(currentGraph))
+#     # Break ties: When there are ties, choose the first of the winners.
+#     startNode = names(currentGraph[maxProb[1]])
+#     if (!is.null(num.misses)) {
+#       if (startNode %in% S) {
+#         numMisses = 0
+#       } else {
+#         numMisses = numMisses + 1
+#       }
+#       current_node_set = c(current_node_set, startNode)
+#       if (numMisses>num.misses || length(c(startNode,current_node_set))>=(length(G))) {
+#         stopIterating = TRUE
+#       }
+#     } else {
+#       # Keep drawing until you've drawn all nodes.
+#       current_node_set = c(current_node_set, startNode)
+#       if (length(current_node_set)>=(length(G))) {
+#         stopIterating = TRUE
+#       }
+#     }
+#     
+#   }
+#   return(current_node_set)
+# }
+# 
+# args = commandArgs(trailingOnly=TRUE)
+# diag = as.character(args[1])
+# fold = as.numeric(args[2])
+# n = as.numeric(args[3])
+# wkdir = as.character(args[4])
+# rankdir = as.character(args[5])
+# graphdir = as.character(args[6])
+# 
+# model=diag
+# print(diag)
+# print(fold)
+# print(n)
+# 
+# setwd(sprintf("%s/%s",wkdir,rankdir))
+# ig = loadToEnv(sprintf("../%s/bg_%s_fold%d.RData", graphdir, model,fold))[["ig_pruned"]]
+# 
+# print(ig)
+# V(ig)$name = tolower(V(ig)$name)
+# G = vector(mode="list", length=length(V(ig)$name))
+# names(G) = V(ig)$name
+# adjacency_matrix = list(as.matrix(get.adjacency(ig, attr="weight")))
+# p0=0.1
+# p1=0.9
+# thresholdDiff=0.01
+# all_nodes = tolower(V(ig)$name)
+# print(head(all_nodes))
+# current_node_set = singleNode.getNodeRanksN(n, G)
+# new_dir =  sprintf("./%s/diag%s%d",model, diag, fold)
+# if (!dir.exists(new_dir)) {
+#   str = sprintf("mkdir %s", new_dir)
+#   system(str)
+# }
+# save(current_node_set, file=sprintf("./%s/diag%s%d/%d.RData",model, diag, fold, n))
+# 
+################################ end of getRanksN.r ##########################################
+
+################################### getRanks.pbs ##############################################
+# # Request 1 processors on 1 node
+# #PBS -l nodes=1:ppn=1
+# 
+# #Request x number of hours of walltime
+# #PBS -l walltime=1:00:00
+# 
+# #Request that regular output and terminal output go to the same file
+# #PBS -j oe
+# #PBS -m abe
+# 
+# module load R/3.5
+# 
+# diag=${diag}
+# fold=${fold}
+# n=${n}
+# wkdir=${wkdir}
+# rankdir=${rankdir}
+# cd ${wkdir}/${rankdir}
+# 
+# Rscript ../getRanksN.r $diag $fold $n $wkdir ${rankdir} ${graphdir} > ranks:$diag-$fold-$n.out
+# rm ranks:$diag-$fold-$n.out
+###################################### end of getRanks.pbs ########################################
+
 ```
 
 ## Get the main disease module for each disease-specific network model. (skip if using github-saved ranks)
 ```{r getDisMod}
 rm(list=setdiff(ls(),c(grep("dir|models",ls(),value = T),lsf.str())))
-data_mx=apply(loadToEnv("clinical_data.RData")[["data_mx.ogBnry"]],c(1,2),as.numeric)
-cohorts=loadToEnv("clinical_data.RData")[["cohorts"]]
-models=c(c("asld", "aadc", "abat", "adsl", "arg","zsd", "rcdp","otc"))
-cohorts[models]=sapply(models, function(x) grep("edta",cohorts[[x]],ignore.case = T,value = T))
-cohorts[["alaimo"]]=NULL
-data_mx=data_mx[,colnames(data_mx) %in% unlist(cohorts)]
-data_mx=data_mx[rowSums(is.na(data_mx)) != ncol(data_mx),]
 
-table(data_mx["argininosuccinate",])
-p0=0.1
-p1=0.9
-thresholdDiff=0.01
 # Add CTDsim distance from "downtown module" as second quantitative variable
 disFromDowntown = function(dis_mod, ptBSbyK.dis, p2.sig.nodes, p2.optBS, ranks, G) {
   p1.e = mle.getEncodingLength(ptBSbyK.dis, NULL, ptID, G)[,"IS.alt"]
@@ -319,6 +480,19 @@ disFromDowntown = function(dis_mod, ptBSbyK.dis, p2.sig.nodes, p2.optBS, ranks, 
                NCD=(p12.e-apply(cbind(p1.e, p2.e), 1, min))/apply(cbind(p1.e, p2.e), 1, max)))
 }
 
+data_mx=apply(loadToEnv("clinical_data.RData")[["data_mx.ogBnry"]],c(1,2),as.numeric)
+cohorts=loadToEnv("clinical_data.RData")[["cohorts"]]
+models=c(c("asld", "aadc", "abat", "adsl", "arg","zsd", "rcdp","otc"))
+cohorts[models]=sapply(models, function(x) grep("edta",cohorts[[x]],ignore.case = T,value = T))
+cohorts[["alaimo"]]=NULL
+data_mx=data_mx[,colnames(data_mx) %in% unlist(cohorts)]
+data_mx=data_mx[rowSums(is.na(data_mx)) != ncol(data_mx),]
+
+table(data_mx["argininosuccinate",])
+p0=0.1
+p1=0.9
+thresholdDiff=0.01
+
 # Get downtown disease modules for all modelled disease states
 disMod = list()
 data_mx0=data_mx
@@ -327,8 +501,8 @@ cohorts[["arg"]]=cohorts[["arg"]][grep("EDTA",cohorts[["arg"]])]
 cohorts[["asld"]]=cohorts[["asld"]][grep("EDTA",cohorts[["asld"]])]
 cohorts[["otc"]]=cohorts[["otc"]][grep("HEP",cohorts[["otc"]])]
 
-
-for (model in c("aadc", "abat", "adsl", "arg", "asld", "cit", "otc", "cob", "ga", "gamt", "msud", "mma", "pa", "zsd", "rcdp", "pku")) { # 
+# showing one example
+for (model in c("cit")) { # "aadc", "abat", "adsl", "arg", "asld", ,"otc", "cob", "ga", "gamt", "msud", "mma", "pa", "zsd", "rcdp", "pku"
   print(sprintf("%s...", toupper(model)))
   data_mx=data_mx0
   mn = apply(data_mx[,which(colnames(data_mx) %in% cohorts[[model]])], 1, function(i) mean(na.omit(i)))
